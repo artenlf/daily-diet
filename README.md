@@ -12,6 +12,9 @@
 - [ ] Deve ser possível recuperar as métricas de um usuário;
 
 ## Regras de Negócio
+- [ ] Um usuário deve conter as seguintes informações:
+      - Nome
+      - Email
 
 - [ ] As refeições devem ser relacionadas a um usuário e deve conter:
       - Nome
