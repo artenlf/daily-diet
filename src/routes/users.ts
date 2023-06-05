@@ -5,7 +5,7 @@ import { knex } from '../database'
 import { checkSessionIdExists } from '../middlewares/check-session-id-exists'
 
 export async function usersRoutes(app: FastifyInstance) {
-  app.get('/', { preHandler: [checkSessionIdExists] }, async (request) => {
+  app.get('/users', { preHandler: [checkSessionIdExists] }, async (request) => {
     const { sessionId } = request.cookies
 
     const users = await knex('users').where('session_id', sessionId).select()
@@ -13,34 +13,38 @@ export async function usersRoutes(app: FastifyInstance) {
     return { users }
   })
 
-  app.get('/:id', { preHandler: [checkSessionIdExists] }, async (request) => {
-    const getTransactionsParamsSchema = z.object({
-      id: z.string().uuid(),
-    })
-
-    const { id } = getTransactionsParamsSchema.parse(request.params)
-
-    const { sessionId } = request.cookies
-
-    const user = await knex('users')
-      .where({
-        id,
-        session_id: sessionId,
+  app.get(
+    '/users/:id',
+    { preHandler: [checkSessionIdExists] },
+    async (request) => {
+      const getUsersParamsSchema = z.object({
+        id: z.string().uuid(),
       })
-      .first()
 
-    return {
-      user,
-    }
-  })
+      const { id } = getUsersParamsSchema.parse(request.params)
 
-  app.post('/', async (request, reply) => {
-    const createTransactionBodySchema = z.object({
+      const { sessionId } = request.cookies
+
+      const user = await knex('users')
+        .where({
+          id,
+          session_id: sessionId,
+        })
+        .first()
+
+      return {
+        user,
+      }
+    },
+  )
+
+  app.post('/users', async (request, reply) => {
+    const createUserBodySchema = z.object({
       name: z.string(),
       email: z.string().email(),
     })
 
-    const { name, email } = createTransactionBodySchema.parse(request.body)
+    const { name, email } = createUserBodySchema.parse(request.body)
 
     let sessionId = request.cookies.sessionId
 
