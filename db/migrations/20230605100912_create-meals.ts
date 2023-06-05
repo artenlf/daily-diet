@@ -8,8 +8,8 @@ export async function up(knex: Knex): Promise<void> {
     table.timestamp('date').defaultTo(knex.fn.now())
     table.boolean('fulfil_diet').defaultTo(false)
 
-    table.uuid('user_id').notNullable()
-    table.foreign('user_id').references('users.id')
+    table.uuid('session_id').notNullable()
+    table.foreign('session_id').references('users.session_id')
   })
 }
 

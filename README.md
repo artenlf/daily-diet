@@ -2,9 +2,9 @@
 
 ## Requisitos Funcionais
 
-- [ ] Deve ser possível criar um usuário;
-- [ ] Deve ser possível identificar o usuário entre as requisições;
-- [ ] Deve ser possível registrar uma refeição feita;
+- [x] Deve ser possível criar um usuário;
+- [x] Deve ser possível identificar o usuário entre as requisições;
+- [x] Deve ser possível registrar uma refeição feita;
 - [ ] Deve ser possível editar todos os campos de uma refeição;
 - [ ] Deve ser possível apagar uma refeição;
 - [ ] Deve ser possível listar todas as refeições de um usuário;
@@ -12,11 +12,11 @@
 - [ ] Deve ser possível recuperar as métricas de um usuário;
 
 ## Regras de Negócio
-- [ ] Um usuário deve conter as seguintes informações:
+- [x] Um usuário deve conter as seguintes informações:
       - Nome
       - Email
 
-- [ ] As refeições devem ser relacionadas a um usuário e deve conter:
+- [x] As refeições devem ser relacionadas a um usuário e deve conter:
       - Nome
       - Descrição
       - Data e Hora
