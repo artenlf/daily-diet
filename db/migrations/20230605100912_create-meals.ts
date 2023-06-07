@@ -1,4 +1,3 @@
-import dayjs from 'dayjs'
 import { Knex } from 'knex'
 
 export async function up(knex: Knex): Promise<void> {
@@ -6,10 +5,7 @@ export async function up(knex: Knex): Promise<void> {
     table.uuid('meal_id').primary()
     table.string('name').notNullable()
     table.string('description').notNullable()
-    table
-      .date('date')
-      .defaultTo(dayjs().format('DD-MM-YYYY HH:mm'))
-      .notNullable()
+    table.date('date').notNullable()
     table.boolean('fulfil_diet').defaultTo(false).notNullable()
 
     table.uuid('user_id').notNullable()

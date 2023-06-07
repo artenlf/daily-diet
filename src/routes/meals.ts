@@ -69,30 +69,9 @@ export async function mealsRoutes(app: FastifyInstance) {
     '/:userId/meals',
     { preHandler: [checkSessionIdExists] },
     async (request, reply) => {
-      const today = dayjs()
-      const maxDate = today.add(5, 'year')
-      const startDate = today.format('DD/MM/YYYY')
-      const maxDateFormatted = maxDate.format('DD/MM/YYYY')
-
       const createMealsBodySchema = z.object({
         name: z.string(),
         description: z.string(),
-        date: z
-          .string()
-          .refine((value) => dayjs(value, 'DD/MM/YYYY-HHTmm', true).isValid(), {
-            message: 'Invalid date format. Expected DD/MM/YYYY.',
-          })
-          .refine(
-            (value) => {
-              const selectedDate = dayjs(value, 'DD/MM/YYYY')
-              return (
-                selectedDate.isAfter(today) && selectedDate.isBefore(maxDate)
-              )
-            },
-            {
-              message: `Date must be between ${startDate} and ${maxDateFormatted} and contain.`,
-            },
-          ),
         fulfilDiet: z.boolean(),
       })
 
@@ -102,8 +81,9 @@ export async function mealsRoutes(app: FastifyInstance) {
 
       const { userId } = getUsersParamsSchema.parse(request.params)
 
-      const { name, description, date, fulfilDiet } =
-        createMealsBodySchema.parse(request.body)
+      const { name, description, fulfilDiet } = createMealsBodySchema.parse(
+        request.body,
+      )
 
       const sessionId = request.cookies.sessionId
       if (!sessionId) {
@@ -116,7 +96,7 @@ export async function mealsRoutes(app: FastifyInstance) {
         meal_id: randomUUID(),
         name,
         description,
-        date,
+        date: dayjs().format('DD/MM/YYYY HH:mm'),
         fulfil_diet: fulfilDiet,
       })
 
@@ -129,10 +109,12 @@ export async function mealsRoutes(app: FastifyInstance) {
     '/:userId/meals/:mealId',
     { preHandler: [checkSessionIdExists] },
     async (request, reply) => {
-      const today = dayjs()
-      const maxDate = today.add(5, 'year')
-      const startDate = today.format('DD/MM/YYYY')
-      const maxDateFormatted = maxDate.format('DD/MM/YYYY')
+      const today = dayjs().locale('pt-BR')
+      const maxDate = today
+        .add(5, 'year')
+        .endOf('day')
+        .format('DD/MM/YYYY HH:mm')
+      const startDate = today.startOf('day').format('DD/MM/YYYY HH:mm')
 
       const getUsersParamsSchema = z.object({
         userId: z.string().uuid(),
@@ -146,18 +128,21 @@ export async function mealsRoutes(app: FastifyInstance) {
         description: z.string(),
         date: z
           .string()
-          .refine((value) => dayjs(value, 'DD/MM/YYYY', true).isValid(), {
-            message: 'Invalid date format. Expected DD/MM/YYYY.',
+          .datetime({ offset: true })
+          .transform((value) => {
+            const formattedTime = dayjs(value).format('DD/MM/YYYY HH:mm')
+
+            return formattedTime
           })
           .refine(
             (value) => {
-              const selectedDate = dayjs(value, 'DD/MM/YYYY')
+              const selectedDate = dayjs(value)
               return (
                 selectedDate.isAfter(today) && selectedDate.isBefore(maxDate)
               )
             },
             {
-              message: `Date must be between ${startDate} and ${maxDateFormatted}.`,
+              message: `Date must be between ${startDate} and ${maxDate}.`,
             },
           ),
         fulfilDiet: z.boolean(),
@@ -195,4 +180,34 @@ export async function mealsRoutes(app: FastifyInstance) {
   )
 
   // Delete an existing meal from a User
+  app.delete(
+    '/:userId/meals/:mealId',
+    { preHandler: [checkSessionIdExists] },
+    async (request, reply) => {
+      const getUsersParamsSchema = z.object({
+        userId: z.string().uuid(),
+      })
+      const getMealsParamsSchema = z.object({
+        mealId: z.string().uuid(),
+      })
+
+      const { userId } = getUsersParamsSchema.parse(request.params)
+      const { mealId } = getMealsParamsSchema.parse(request.params)
+
+      const { sessionId } = request.cookies
+      if (!sessionId) {
+        throw new Error('not allowed')
+      }
+
+      await knex('meals')
+        .where({
+          meal_id: mealId,
+          user_id: userId,
+          session_id: sessionId,
+        })
+        .delete()
+
+      return reply.status(204).send()
+    },
+  )
 }
