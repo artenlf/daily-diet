@@ -5,6 +5,7 @@ import { knex } from '../database'
 import { checkSessionIdExists } from '../middlewares/check-session-id-exists'
 
 export async function usersRoutes(app: FastifyInstance) {
+  // List all Users in the database
   app.get('/users', { preHandler: [checkSessionIdExists] }, async (request) => {
     const { sessionId } = request.cookies
 
@@ -13,21 +14,22 @@ export async function usersRoutes(app: FastifyInstance) {
     return { users }
   })
 
+  // List an specific User in the database
   app.get(
-    '/users/:id',
+    '/users/:userId',
     { preHandler: [checkSessionIdExists] },
     async (request) => {
       const getUsersParamsSchema = z.object({
-        id: z.string().uuid(),
+        userId: z.string().uuid(),
       })
 
-      const { id } = getUsersParamsSchema.parse(request.params)
+      const { userId } = getUsersParamsSchema.parse(request.params)
 
       const { sessionId } = request.cookies
 
       const user = await knex('users')
         .where({
-          id,
+          user_id: userId,
           session_id: sessionId,
         })
         .first()
@@ -38,6 +40,7 @@ export async function usersRoutes(app: FastifyInstance) {
     },
   )
 
+  // Create a new User in the database
   app.post('/users', async (request, reply) => {
     const createUserBodySchema = z.object({
       name: z.string(),
@@ -58,7 +61,7 @@ export async function usersRoutes(app: FastifyInstance) {
     }
 
     await knex('users').insert({
-      id: randomUUID(),
+      user_id: randomUUID(),
       name,
       email,
       session_id: sessionId,

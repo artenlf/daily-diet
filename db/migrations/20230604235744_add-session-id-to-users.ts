@@ -2,7 +2,7 @@ import { Knex } from 'knex'
 
 export async function up(knex: Knex): Promise<void> {
   await knex.schema.alterTable('users', (table) => {
-    table.uuid('session_id').after('id').index()
+    table.uuid('session_id').after('user_id').index()
   })
 }
 
