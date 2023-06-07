@@ -9,7 +9,7 @@
 - [x] Deve ser possível apagar uma refeição;
 - [x] Deve ser possível listar todas as refeições de um usuário;
 - [x] Deve ser possível visualizar uma única refeição;
-- [ ] Deve ser possível recuperar as métricas de um usuário;
+- [x] Deve ser possível recuperar as métricas de um usuário;
 
 ## Regras de Negócio
 - [x] Um usuário deve conter as seguintes informações:
@@ -22,7 +22,7 @@
       - Data e Hora
       - Está dentro ou não da dieta
       
-- [ ] As métricas de um usuário devem conter:
+- [x] As métricas de um usuário devem conter:
       - Quantidade total de refeições registradas
       - Quantidade total de refeições dentro da dieta
       - Quantidade total de refeições fora da dieta

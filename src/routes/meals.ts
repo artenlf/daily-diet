@@ -210,4 +210,63 @@ export async function mealsRoutes(app: FastifyInstance) {
       return reply.status(204).send()
     },
   )
+
+  // User stats
+  app.get(
+    '/:userId/stats',
+    { preHandler: [checkSessionIdExists] },
+    async (request) => {
+      const getUsersParamsSchema = z.object({
+        userId: z.string().uuid(),
+      })
+
+      const { userId } = getUsersParamsSchema.parse(request.params)
+
+      // Get the total number of meals of the user
+      const totalNumberOfMeals = (
+        await knex('meals').where({ user_id: userId })
+      ).length
+
+      // Get the total number of meals fulfilling the Diet of the user
+      const totalNumberOfMealsFulfillingDiet = (
+        await knex('meals').where({
+          user_id: userId,
+          fulfil_diet: true,
+        })
+      ).length
+
+      // Get the total number of meals not fulfilling the Diet of the user
+      const totalNumberOfMealsNotFulfillingDiet = (
+        await knex('meals').where({
+          user_id: userId,
+          fulfil_diet: false,
+        })
+      ).length
+
+      // Streak of meals fulfilling the Diet of the user
+      const meals = await knex('meals').where({
+        user_id: userId,
+      })
+
+      const streakOfMealsFullingDiet = meals.reduce(
+        (result, meal) => {
+          if (meal.fulfil_diet === 1) {
+            result.count += 1
+            result.maxStreak = Math.max(result.maxStreak, result.count)
+          } else {
+            result.count = 0
+          }
+          return result
+        },
+        { count: 0, maxStreak: 0 },
+      ).maxStreak
+
+      return {
+        totalNumberOfMeals,
+        totalNumberOfMealsFulfillingDiet,
+        totalNumberOfMealsNotFulfillingDiet,
+        streakOfMealsFullingDiet,
+      }
+    },
+  )
 }
